@@ -1,6 +1,15 @@
 # let's just load and filter what we want out of the table that way
 # use source(file="LoadAndPrepInput.R") to execute the above in each plot file
-# we expect to be in the code directory, with the data file one level up
+# we expect to be in the code directory, with the data file in the same directory
+
+# should we download the file first? It's pretty dumb if we're doing a bunch of things 
+# at once. But the project description does say to allow each one to be executed independently.
+# so:
+datafile <- "exdata-data-household_power_consumption.zip"
+if (! file.exists(datafile)) {
+  dataUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+  download.file(url=dataUrl,destfile=datafile,method="curl")
+}
 
 # read data directly from zip file
 zipfile <- unz("../exdata-data-household_power_consumption.zip","household_power_consumption.txt")
