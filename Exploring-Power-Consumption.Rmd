@@ -1,0 +1,94 @@
+Electric Power Consumption  - Exploratory
+========================================================
+
+This file is *not* the assignment - this is my working draft of the components that will go into the final assignment submission.
+
+We only care about two days worth of data. I thought it was a lot simpler to pull the data out from the unzipped text file using shell script, and then import the data.
+
+But in keeping with the code I eventually wrote for the plot scripts, I'll just pull it in and
+reuse it that way.
+ 
+```{r}
+source(file="LoadAndPrepInput.R")
+```
+
+Here is the codebook for the data:
+
+1. Date: Date in format dd/mm/yyyy
+2. Time: time in format hh:mm:ss
+3. Global_active_power: household global minute-averaged active power (in kilowatt)
+4. Global_reactive_power: household global minute-averaged reactive power (in kilowatt)￼￼￼￼￼￼￼￼￼￼￼
+5. Voltage: minute-averaged voltage (in volt)
+6. Global_intensity: household global minute-averaged current intensity (in ampere)
+7. Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the
+kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but
+gas powered).
+8. Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the
+laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+9. Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an
+electric water-heater and an air-conditioner.
+
+Finally we have something we can look at, let's start with the summary data
+```{r}
+summary(hpc)
+```
+
+Now we can get to plotting something.
+
+First one is power frequency histogram.
+
+```{r,fig.width=10,fig.height=8}
+hist(hpc$Global_active_power,xlab="Global Active Power (kilowatts)", ylim=c(0,1200), col="red",
+     main='Global Active Power')
+```
+
+Next one is global active power per day.
+
+```{r,fig.width=10,fig.height=8}
+# earlier experiment
+#hpc$weekday <- weekdays(hpc$datetime,abbreviate=TRUE)
+#hpc$weekday <- as.factor(hpc$weekday)
+#powday <- aggregate(hpc$Global_active_power,by=list(hpc$weekday),sum)
+
+with(hpc, plot(x=DateTime, y=Global_active_power,type="l",xlab="", ylab="Global Active Power (kilowatts)"))
+
+```
+
+Next one is sub-metering levels per day, one line each.
+
+```{r,fig.width=10,fig.height=8}
+with(hpc, plot(x=DateTime, y=Sub_metering_1,type="l",xlab="", ylab="Energy sub metering"))
+with(hpc, lines(x=DateTime,y=Sub_metering_2,col="red"))
+with(hpc, lines(x=DateTime,y=Sub_metering_3,type="l",col="blue"))
+with(hpc, legend("topright", 
+                 legend=c("Sub_metering_1","Sub_metering_2","Sub_metering_3"), 
+                 col=c("black","red","blue"), lty=1 ))
+```
+
+Last one is a 2x2 layout of:
+power per day, voltage per day
+sub-meters per day, reactive power per day
+
+```{r,fig.width=10,fig.height=10}
+par(mfrow=c(2,2))
+# TODO make a function to factor out out the common elements here
+#for now just copy from previous graphs, global active power
+# note this one is subtly different on the ylabel - no units declared now
+with(hpc, plot(x=DateTime, y=Global_active_power,type="l",xlab="", ylab="Global Active Power"))
+
+# second graph also uses a simple xlabel, make sure its there
+with(hpc, plot(x=DateTime, y=Voltage,type="l",xlab="datetime", ylab="Voltage"))
+
+#third graph is just sub-metering again (but no box around the legend)
+with(hpc, plot(x=DateTime, y=Sub_metering_1,type="l",xlab="", ylab="Energy sub metering"))
+with(hpc, lines(x=DateTime,y=Sub_metering_2,col="red"))
+with(hpc, lines(x=DateTime,y=Sub_metering_3,col="blue"))
+with(hpc, legend("topright", bty="n",
+                 legend=c("Sub_metering_1","Sub_metering_2","Sub_metering_3"), 
+                 col=c("black","red","blue"), lty=1 ))
+
+# last graph is reactive-power version of the first graph,different labeling again
+with(hpc, plot(x=DateTime, y=Global_reactive_power,type="l",xlab="datetime"))
+
+```
+
